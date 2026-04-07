@@ -95,8 +95,8 @@ export function isInBounds(board: Cell[][], row: number, col: number): boolean {
  * Moves the boat in a cardinal direction. Auto-reveals the destination cell.
  * Returns the updated game state, or null if the move is invalid (out of bounds).
  *
- * Note: This function does NOT handle mine explosion damage — that's CS1-8.
- * It only moves the boat and reveals the cell.
+ * Note: This function does NOT handle mine explosion damage.
+ * Compose with handleMineStep() after calling this to process explosions.
  */
 export function moveBoat(
   gameState: GameState,

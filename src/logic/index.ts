@@ -1,3 +1,5 @@
 export { createEmptyBoard, assignMinePower, placeMines, findWaterComponents, fillInaccessibleCells, createBoard } from './board'
 export { adjacentMines, hasBoat, revealCell } from './cells'
 export { findStartingPosition, initializeGame, cloneBoard, isInBounds, moveBoat, teleportBoat } from './navigation'
+export { getBlastOffsets, explodeMines, handleMineStep } from './explosions'
+export type { ExplosionResult } from './explosions'
