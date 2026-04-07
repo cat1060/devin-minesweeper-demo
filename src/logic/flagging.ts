@@ -119,7 +119,9 @@ export function findRelocationTarget(
 /**
  * Toggles the flag on a cell and handles boat relocation if needed.
  * - Cycles flag: NONE → FLAG → QUESTION → NONE
- * - Requires at least one revealed adjacent cell (canFlag)
+ * - Placing a new flag (NONE → FLAG) requires at least one revealed adjacent
+ *   cell (canFlag). Cycling an existing flag (FLAG → QUESTION, QUESTION → NONE)
+ *   always succeeds so the player is never stuck with an un-removable marker.
  * - If the boat is not adjacent to the flagged cell, relocates the boat
  *   to a revealed neighbor of the flagged cell (prefers cardinal)
  *
@@ -133,7 +135,13 @@ export function flagCell(
 ): GameState | null {
   if (gameState.gameStatus !== GameStatus.PLAYING) return null
   if (!isInBounds(gameState.board, row, col)) return null
-  if (!canFlag(gameState.board, row, col)) return null
+
+  const currentFlag = gameState.board[row][col].flagType
+  // Adjacency check only applies when placing a new flag (NONE → FLAG).
+  // Cycling an existing flag always succeeds so the player can always unflag.
+  if (currentFlag === FlagType.NONE && !canFlag(gameState.board, row, col)) return null
+  // Revealed cells can never be flagged regardless of transition
+  if (gameState.board[row][col].isRevealed) return null
 
   const newBoard = cloneBoard(gameState.board)
   const cell = newBoard[row][col]

@@ -208,11 +208,30 @@ describe('flagCell', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null for cells with no revealed neighbors', () => {
+  it('returns null for unflagged cells with no revealed neighbors', () => {
     const state = createTestState()
     const result = flagCell(state, 4, 4)
 
     expect(result).toBeNull()
+  })
+
+  it('allows unflagging even when no revealed neighbors exist', () => {
+    const state = createTestState()
+    // Place a FLAG on an isolated cell (no revealed neighbors)
+    state.board[4][4].flagType = FlagType.FLAG
+
+    const result = flagCell(state, 4, 4)
+    expect(result).not.toBeNull()
+    expect(result!.board[4][4].flagType).toBe(FlagType.QUESTION)
+  })
+
+  it('allows removing QUESTION even when no revealed neighbors exist', () => {
+    const state = createTestState()
+    state.board[4][4].flagType = FlagType.QUESTION
+
+    const result = flagCell(state, 4, 4)
+    expect(result).not.toBeNull()
+    expect(result!.board[4][4].flagType).toBe(FlagType.NONE)
   })
 
   it('returns null when game is not PLAYING', () => {
