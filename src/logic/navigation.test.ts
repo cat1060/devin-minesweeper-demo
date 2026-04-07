@@ -240,6 +240,24 @@ describe('moveBoat', () => {
     expect(revealedCount).toBeGreaterThan(2)
   })
 
+  it('does not mutate the original game state board', () => {
+    const state = createTestState()
+    const originalBoard = state.board
+    const originalRevealed = state.board[1][2].isRevealed
+
+    const result = moveBoat(state, 'up')
+    expect(result).not.toBeNull()
+
+    // Original state's board reference should be unchanged
+    expect(state.board).toBe(originalBoard)
+    // Original board cell should NOT have been mutated
+    expect(state.board[1][2].isRevealed).toBe(originalRevealed)
+    // New state should have a different board reference
+    expect(result!.board).not.toBe(state.board)
+    // New state's board should have the cell revealed
+    expect(result!.board[1][2].isRevealed).toBe(true)
+  })
+
   it('does not flood-fill when moving to a cell with adjacent mines', () => {
     const state = createTestState()
     // Place a mine at (0,2) so cell (1,2) has adjacent mines

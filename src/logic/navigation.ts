@@ -78,6 +78,13 @@ export function initializeGame(
 }
 
 /**
+ * Creates a deep copy of a board (new 2D array with cloned Cell objects).
+ */
+export function cloneBoard(board: Cell[][]): Cell[][] {
+  return board.map(row => row.map(cell => ({ ...cell })))
+}
+
+/**
  * Checks if a position is within the board boundaries.
  */
 export function isInBounds(board: Cell[][], row: number, col: number): boolean {
@@ -106,16 +113,17 @@ export function moveBoat(
 
   if (!isInBounds(gameState.board, newRow, newCol)) return null
 
-  // Move the boat
-  const newState: GameState = {
-    ...gameState,
-    boatPosition: { row: newRow, col: newCol },
-  }
+  // Deep-copy the board to avoid mutating the input state
+  const newBoard = cloneBoard(gameState.board)
 
   // Auto-reveal the destination cell (flood-fill if 0 adjacent mines)
-  revealCell(newState.board, newRow, newCol)
+  revealCell(newBoard, newRow, newCol)
 
-  return newState
+  return {
+    ...gameState,
+    board: newBoard,
+    boatPosition: { row: newRow, col: newCol },
+  }
 }
 
 /**
