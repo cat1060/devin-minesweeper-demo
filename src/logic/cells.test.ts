@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { adjacentMines, hasBoat, revealCell } from './cells'
+import { adjacentMines, hasBoat, revealCell, checkWinCondition } from './cells'
 import { createEmptyBoard } from './board'
 import { FlagType, GameStatus } from '../types/game'
 import type { GameState } from '../types/game'
@@ -189,5 +189,125 @@ describe('revealCell', () => {
         expect(cell.isRevealed).toBe(true)
       }
     }
+  })
+})
+
+describe('checkWinCondition', () => {
+  function makeState(overrides: Partial<GameState> = {}): GameState {
+    return {
+      board: createEmptyBoard(3, 3),
+      boatPosition: { row: 0, col: 0 },
+      hp: 5,
+      initialHp: 5,
+      mineCount: 1,
+      initialMineCount: 1,
+      gameStatus: GameStatus.PLAYING,
+      ...overrides,
+    }
+  }
+
+  it('returns WON when all unrevealed cells are mines', () => {
+    const board = createEmptyBoard(3, 3)
+    board[2][2].minePower = 1
+    // Reveal all non-mine cells
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        if (r !== 2 || c !== 2) board[r][c].isRevealed = true
+      }
+    }
+    const state = makeState({ board })
+    const result = checkWinCondition(state)
+    expect(result.gameStatus).toBe(GameStatus.WON)
+  })
+
+  it('does not win when unrevealed non-mine cells remain', () => {
+    const board = createEmptyBoard(3, 3)
+    board[2][2].minePower = 1
+    // Reveal some but not all non-mine cells
+    board[0][0].isRevealed = true
+    board[0][1].isRevealed = true
+    const state = makeState({ board })
+    const result = checkWinCondition(state)
+    expect(result.gameStatus).toBe(GameStatus.PLAYING)
+  })
+
+  it('treats exploded mines as accounted for', () => {
+    const board = createEmptyBoard(3, 3)
+    board[2][2].minePower = 1
+    board[2][2].isExploded = true
+    board[2][2].isRevealed = true
+    // Reveal all other cells
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        if (r !== 2 || c !== 2) board[r][c].isRevealed = true
+      }
+    }
+    const state = makeState({ board })
+    const result = checkWinCondition(state)
+    expect(result.gameStatus).toBe(GameStatus.WON)
+  })
+
+  it('does not change state if already WON', () => {
+    const state = makeState({ gameStatus: GameStatus.WON })
+    const result = checkWinCondition(state)
+    expect(result).toBe(state)
+    expect(result.gameStatus).toBe(GameStatus.WON)
+  })
+
+  it('does not change state if already LOST', () => {
+    const state = makeState({ gameStatus: GameStatus.LOST })
+    const result = checkWinCondition(state)
+    expect(result).toBe(state)
+    expect(result.gameStatus).toBe(GameStatus.LOST)
+  })
+
+  it('wins with multiple mines when all non-mine cells revealed', () => {
+    const board = createEmptyBoard(3, 3)
+    board[0][0].minePower = 1
+    board[1][1].minePower = 2
+    board[2][2].minePower = 3
+    // Reveal all non-mine cells
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        if (board[r][c].minePower === 0) board[r][c].isRevealed = true
+      }
+    }
+    const state = makeState({ board, mineCount: 3 })
+    const result = checkWinCondition(state)
+    expect(result.gameStatus).toBe(GameStatus.WON)
+  })
+
+  it('does not win when a flagged non-mine cell exists', () => {
+    const board = createEmptyBoard(3, 3)
+    board[2][2].minePower = 1
+    // Reveal most cells but flag a non-mine cell instead of revealing it
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        if (r === 2 && c === 2) continue // mine, leave unrevealed
+        if (r === 1 && c === 1) {
+          board[r][c].flagType = FlagType.FLAG // flagged non-mine, not revealed
+          continue
+        }
+        board[r][c].isRevealed = true
+      }
+    }
+    const state = makeState({ board })
+    const result = checkWinCondition(state)
+    expect(result.gameStatus).toBe(GameStatus.PLAYING)
+  })
+
+  it('preserves all other state fields when setting WON', () => {
+    const board = createEmptyBoard(2, 2)
+    board[1][1].minePower = 1
+    board[0][0].isRevealed = true
+    board[0][1].isRevealed = true
+    board[1][0].isRevealed = true
+    const state = makeState({ board, hp: 3, mineCount: 1, boatPosition: { row: 0, col: 0 } })
+    const result = checkWinCondition(state)
+    expect(result.gameStatus).toBe(GameStatus.WON)
+    expect(result.hp).toBe(3)
+    expect(result.mineCount).toBe(1)
+    expect(result.boatPosition).toEqual({ row: 0, col: 0 })
+    expect(result.board).toBe(state.board)
   })
 })
