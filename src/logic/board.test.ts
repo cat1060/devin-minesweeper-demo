@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   createEmptyBoard,
-  randomMinePower,
+  assignMinePower,
   placeMines,
   findWaterComponents,
   fillInaccessibleCells,
@@ -29,23 +29,23 @@ describe('createEmptyBoard', () => {
   })
 })
 
-describe('randomMinePower', () => {
-  it('returns power 1 for rng values < 0.6', () => {
-    expect(randomMinePower(() => 0)).toBe(1)
-    expect(randomMinePower(() => 0.3)).toBe(1)
-    expect(randomMinePower(() => 0.59)).toBe(1)
+describe('assignMinePower', () => {
+  it('returns power 1 for values < 0.6', () => {
+    expect(assignMinePower(0)).toBe(1)
+    expect(assignMinePower(0.3)).toBe(1)
+    expect(assignMinePower(0.59)).toBe(1)
   })
 
-  it('returns power 2 for rng values >= 0.6 and < 0.9', () => {
-    expect(randomMinePower(() => 0.6)).toBe(2)
-    expect(randomMinePower(() => 0.75)).toBe(2)
-    expect(randomMinePower(() => 0.89)).toBe(2)
+  it('returns power 2 for values >= 0.6 and < 0.9', () => {
+    expect(assignMinePower(0.6)).toBe(2)
+    expect(assignMinePower(0.75)).toBe(2)
+    expect(assignMinePower(0.89)).toBe(2)
   })
 
-  it('returns power 3 for rng values >= 0.9', () => {
-    expect(randomMinePower(() => 0.9)).toBe(3)
-    expect(randomMinePower(() => 0.95)).toBe(3)
-    expect(randomMinePower(() => 0.99)).toBe(3)
+  it('returns power 3 for values >= 0.9', () => {
+    expect(assignMinePower(0.9)).toBe(3)
+    expect(assignMinePower(0.95)).toBe(3)
+    expect(assignMinePower(0.99)).toBe(3)
   })
 })
 
