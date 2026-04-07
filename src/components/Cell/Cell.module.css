@@ -52,6 +52,11 @@
   border: 1px solid #5f9ea0;
 }
 
+.mineRevealed {
+  background: #c0c0c0;
+  border: 1px solid #999;
+}
+
 .flagged {
   background: #c0c0c0;
   border-top: 2px solid #fff;

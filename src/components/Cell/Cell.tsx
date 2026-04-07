@@ -9,8 +9,15 @@ interface CellProps {
   col: number
   board: CellType[][]
   isBoat: boolean
+  gameOver: boolean
   onClick: (row: number, col: number) => void
   onRightClick: (row: number, col: number) => void
+}
+
+function getMineEmoji(minePower: number): string {
+  if (minePower === 1) return '\uD83E\uDDE8'  // 🧨
+  if (minePower === 2) return '\uD83D\uDCA3'  // 💣
+  return '\uD83D\uDCA5'                        // 💥 (power 3)
 }
 
 function getCellContent(
@@ -18,11 +25,13 @@ function getCellContent(
   board: CellType[][],
   row: number,
   col: number,
+  gameOver: boolean,
 ): string {
-  if (cell.isExploded) {
-    if (cell.minePower === 1) return '\uD83E\uDDE8'  // 🧨
-    if (cell.minePower === 2) return '\uD83D\uDCA3'  // 💣
-    return '\uD83D\uDCA5'                            // 💥 (power 3)
+  if (cell.isExploded) return getMineEmoji(cell.minePower)
+
+  // Show unrevealed mines at game end
+  if (gameOver && !cell.isRevealed && cell.minePower > 0) {
+    return getMineEmoji(cell.minePower)
   }
 
   if (!cell.isRevealed) {
@@ -37,13 +46,16 @@ function getCellContent(
   return ''
 }
 
-function getCellClassName(cell: CellType, isBoat: boolean): string {
+function getCellClassName(cell: CellType, isBoat: boolean, gameOver: boolean): string {
   const classes = [styles.cell]
 
   if (isBoat) {
     classes.push(styles.boat)
   } else if (cell.isExploded) {
     classes.push(styles.exploded)
+  } else if (gameOver && !cell.isRevealed && cell.minePower > 0) {
+    // Unrevealed mines at game end: gray background (not red)
+    classes.push(styles.mineRevealed)
   } else if (!cell.isRevealed) {
     if (cell.flagType !== FlagType.NONE) {
       classes.push(styles.flagged)
@@ -88,11 +100,12 @@ export default function Cell({
   col,
   board,
   isBoat,
+  gameOver,
   onClick,
   onRightClick,
 }: CellProps) {
-  const content = getCellContent(cell, board, row, col)
-  const className = getCellClassName(cell, isBoat)
+  const content = getCellContent(cell, board, row, col, gameOver)
+  const className = getCellClassName(cell, isBoat, gameOver)
   const countClass = getCountClass(cell, board, row, col)
   const boatCount = isBoat ? adjacentMines(board, row, col) : 0
   const showSplit = isBoat && boatCount > 0

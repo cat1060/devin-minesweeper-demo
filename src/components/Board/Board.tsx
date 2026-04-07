@@ -1,4 +1,5 @@
 import type { GameState } from '../../types/game'
+import { GameStatus } from '../../types/game'
 import Cell from '../Cell/Cell'
 import styles from './Board.module.css'
 
@@ -9,7 +10,8 @@ interface BoardProps {
 }
 
 export default function Board({ gameState, onCellClick, onCellRightClick }: BoardProps) {
-  const { board, boatPosition } = gameState
+  const { board, boatPosition, gameStatus } = gameState
+  const gameOver = gameStatus === GameStatus.WON || gameStatus === GameStatus.LOST
 
   return (
     <div className={styles.board}>
@@ -23,6 +25,7 @@ export default function Board({ gameState, onCellClick, onCellRightClick }: Boar
               col={c}
               board={board}
               isBoat={boatPosition.row === r && boatPosition.col === c}
+              gameOver={gameOver}
               onClick={onCellClick}
               onRightClick={onCellRightClick}
             />
