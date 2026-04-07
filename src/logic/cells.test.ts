@@ -61,6 +61,7 @@ describe('hasBoat', () => {
     hp: 5,
     initialHp: 5,
     mineCount: 0,
+    initialMineCount: 0,
     gameStatus: GameStatus.PLAYING,
   })
 

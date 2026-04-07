@@ -33,6 +33,7 @@ export interface GameState {
   hp: number
   initialHp: number
   mineCount: number
+  initialMineCount: number
   gameStatus: GameStatus
 }
 

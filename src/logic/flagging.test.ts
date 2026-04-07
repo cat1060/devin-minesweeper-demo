@@ -169,6 +169,7 @@ describe('flagCell', () => {
       hp: 5,
       initialHp: 5,
       mineCount: 3,
+      initialMineCount: 3,
       gameStatus: GameStatus.PLAYING,
     }
   }

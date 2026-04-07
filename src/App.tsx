@@ -47,8 +47,8 @@ function App() {
   const resetGame = useCallback(() => {
     const rows = gameState.board.length
     const cols = gameState.board[0].length
-    startNewGame(rows, cols, gameState.mineCount, gameState.initialHp)
-  }, [gameState.board, gameState.mineCount, gameState.initialHp, startNewGame])
+    startNewGame(rows, cols, gameState.initialMineCount, gameState.initialHp)
+  }, [gameState.board, gameState.initialMineCount, gameState.initialHp, startNewGame])
 
   // Keyboard handler for boat movement
   useEffect(() => {
@@ -56,7 +56,7 @@ function App() {
       if (showSettings) return
 
       const key = e.key
-      const movementKeys = ['w', 'a', 's', 'd', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
+      const movementKeys = ['w', 'a', 's', 'd', 'W', 'A', 'S', 'D', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
 
       if (movementKeys.includes(key)) {
         e.preventDefault()

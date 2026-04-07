@@ -18,10 +18,7 @@ function getCellContent(
   board: CellType[][],
   row: number,
   col: number,
-  isBoat: boolean,
 ): string {
-  if (isBoat) return '\u26F5'
-
   if (cell.isExploded) return '\uD83D\uDCA5'
 
   if (!cell.isRevealed) {
@@ -61,9 +58,8 @@ function getCountClass(
   board: CellType[][],
   row: number,
   col: number,
-  isBoat: boolean,
 ): string {
-  if (isBoat || cell.isExploded || !cell.isRevealed) return ''
+  if (cell.isExploded || !cell.isRevealed) return ''
 
   const count = adjacentMines(board, row, col)
   if (count === 0) return ''
@@ -91,9 +87,11 @@ export default function Cell({
   onClick,
   onRightClick,
 }: CellProps) {
-  const content = getCellContent(cell, board, row, col, isBoat)
+  const content = getCellContent(cell, board, row, col)
   const className = getCellClassName(cell, isBoat)
-  const countClass = getCountClass(cell, board, row, col, isBoat)
+  const countClass = getCountClass(cell, board, row, col)
+  const boatCount = isBoat ? adjacentMines(board, row, col) : 0
+  const showSplit = isBoat && boatCount > 0
 
   return (
     <div
@@ -107,7 +105,14 @@ export default function Cell({
       tabIndex={-1}
       aria-label={`Cell ${row},${col}`}
     >
-      {content}
+      {showSplit ? (
+        <>
+          <span className={styles.boatTop}>{"\u26F5"}</span>
+          <span className={`${styles.boatBottom} ${countClass}`.trim()}>{boatCount}</span>
+        </>
+      ) : (
+        isBoat ? '\u26F5' : content
+      )}
     </div>
   )
 }
