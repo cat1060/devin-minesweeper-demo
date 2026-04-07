@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { GameStatus, DIFFICULTY_PRESETS } from './types/game'
 import type { GameState } from './types/game'
-import { initializeGame, moveBoat, teleportBoat, handleMineStep, flagCell } from './logic'
+import { initializeGame, moveBoat, teleportBoat, handleMineStep, flagCell, checkWinCondition } from './logic'
 import Board from './components/Board/Board'
 import Header from './components/Header/Header'
 import SettingsModal from './components/SettingsModal/SettingsModal'
@@ -63,7 +63,7 @@ function App() {
         setGameState((prev) => {
           const moved = moveBoat(prev, key)
           if (!moved) return prev
-          return handleMineStep(moved)
+          return checkWinCondition(handleMineStep(moved))
         })
       }
     }
@@ -76,7 +76,8 @@ function App() {
   const handleCellClick = useCallback((row: number, col: number) => {
     setGameState((prev) => {
       const result = teleportBoat(prev, row, col)
-      return result ?? prev
+      if (!result) return prev
+      return checkWinCondition(result)
     })
   }, [])
 
@@ -84,7 +85,8 @@ function App() {
   const handleCellRightClick = useCallback((row: number, col: number) => {
     setGameState((prev) => {
       const result = flagCell(prev, row, col)
-      return result ?? prev
+      if (!result) return prev
+      return checkWinCondition(result)
     })
   }, [])
 
