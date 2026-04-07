@@ -49,7 +49,10 @@ function getCellContent(
 function getCellClassName(cell: CellType, isBoat: boolean, gameOver: boolean): string {
   const classes = [styles.cell]
 
-  if (isBoat) {
+  if (isBoat && cell.isExploded) {
+    // Boat on an exploded mine: red background
+    classes.push(styles.exploded)
+  } else if (isBoat) {
     classes.push(styles.boat)
   } else if (cell.isExploded) {
     classes.push(styles.exploded)
@@ -107,8 +110,11 @@ export default function Cell({
   const content = getCellContent(cell, board, row, col, gameOver)
   const className = getCellClassName(cell, isBoat, gameOver)
   const countClass = getCountClass(cell, board, row, col)
-  const boatCount = isBoat ? adjacentMines(board, row, col) : 0
-  const showSplit = isBoat && boatCount > 0
+
+  // Determine what to show in the bottom half when boat is on the cell
+  const boatOnMine = isBoat && cell.isExploded
+  const boatCount = isBoat && !boatOnMine ? adjacentMines(board, row, col) : 0
+  const showSplit = isBoat && (boatCount > 0 || boatOnMine)
 
   return (
     <div
@@ -125,7 +131,9 @@ export default function Cell({
       {showSplit ? (
         <>
           <span className={styles.boatTop}>{"\u26F5"}</span>
-          <span className={`${styles.boatBottom} ${countClass}`.trim()}>{boatCount}</span>
+          <span className={`${styles.boatBottom} ${boatOnMine ? '' : countClass}`.trim()}>
+            {boatOnMine ? getMineEmoji(cell.minePower) : boatCount}
+          </span>
         </>
       ) : (
         isBoat ? '\u26F5' : content
