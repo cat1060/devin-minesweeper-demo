@@ -19,7 +19,11 @@ function getCellContent(
   row: number,
   col: number,
 ): string {
-  if (cell.isExploded) return '\uD83D\uDCA5'
+  if (cell.isExploded) {
+    if (cell.minePower === 1) return '\uD83E\uDDE8'  // 🧨
+    if (cell.minePower === 2) return '\uD83D\uDCA3'  // 💣
+    return '\uD83D\uDCA5'                            // 💥 (power 3)
+  }
 
   if (!cell.isRevealed) {
     if (cell.flagType === FlagType.FLAG) return '\uD83D\uDEA9'
