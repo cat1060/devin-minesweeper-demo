@@ -47,8 +47,8 @@ function App() {
   const resetGame = useCallback(() => {
     const rows = gameState.board.length
     const cols = gameState.board[0].length
-    startNewGame(rows, cols, gameState.mineCount, 5)
-  }, [gameState.board, gameState.mineCount, startNewGame])
+    startNewGame(rows, cols, gameState.mineCount, gameState.initialHp)
+  }, [gameState.board, gameState.mineCount, gameState.initialHp, startNewGame])
 
   // Keyboard handler for boat movement
   useEffect(() => {

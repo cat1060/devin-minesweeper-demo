@@ -28,7 +28,7 @@ function formatTime(seconds: number): string {
 export default function Header({ gameState, timer, onReset, onOpenSettings }: HeaderProps) {
   const flagCount = countFlags(gameState)
   const remainingMines = gameState.mineCount - flagCount
-  const maxHp = 5
+  const maxHp = gameState.initialHp
 
   return (
     <div className={styles.header}>

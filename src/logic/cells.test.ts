@@ -59,6 +59,7 @@ describe('hasBoat', () => {
     board: createEmptyBoard(3, 3),
     boatPosition: { row, col },
     hp: 5,
+    initialHp: 5,
     mineCount: 0,
     gameStatus: GameStatus.PLAYING,
   })

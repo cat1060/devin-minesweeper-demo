@@ -72,6 +72,7 @@ export function initializeGame(
     board,
     boatPosition: startPos,
     hp,
+    initialHp: hp,
     mineCount: finalMineCount,
     gameStatus: GameStatus.PLAYING,
   }

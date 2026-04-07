@@ -167,6 +167,7 @@ describe('flagCell', () => {
       board,
       boatPosition: { row: 2, col: 2 },
       hp: 5,
+      initialHp: 5,
       mineCount: 3,
       gameStatus: GameStatus.PLAYING,
     }
