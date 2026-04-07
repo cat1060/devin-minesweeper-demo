@@ -32,9 +32,26 @@ export default function SettingsModal({ onStart, onClose }: SettingsModalProps) 
     setSelectedPreset(null)
   }
 
-  function handleStart() {
-    onStart(rows, cols, mines, hp)
+  function clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, Math.floor(value)))
   }
+
+  function handleStart() {
+    const clampedRows = clamp(rows, 3, 30)
+    const clampedCols = clamp(cols, 3, 50)
+    const maxMines = clampedRows * clampedCols - 1
+    const clampedMines = clamp(mines, 1, maxMines)
+    const clampedHp = clamp(hp, 1, 20)
+    onStart(clampedRows, clampedCols, clampedMines, clampedHp)
+  }
+
+  const isValid =
+    rows >= 3 && rows <= 30 &&
+    cols >= 3 && cols <= 50 &&
+    mines >= 1 && mines < totalCells &&
+    hp >= 1 && hp <= 20 &&
+    Number.isFinite(rows) && Number.isFinite(cols) &&
+    Number.isFinite(mines) && Number.isFinite(hp)
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -64,49 +81,59 @@ export default function SettingsModal({ onStart, onClose }: SettingsModalProps) 
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Rows</label>
               <input
-                className={styles.input}
+                className={`${styles.input} ${rows < 3 || rows > 30 || !Number.isFinite(rows) ? styles.inputInvalid : ''}`}
                 type="number"
                 min={3}
                 max={30}
                 value={rows}
                 onChange={(e) => setRows(Number(e.target.value))}
               />
+              <span className={styles.inputHint}>3-30</span>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Columns</label>
               <input
-                className={styles.input}
+                className={`${styles.input} ${cols < 3 || cols > 50 || !Number.isFinite(cols) ? styles.inputInvalid : ''}`}
                 type="number"
                 min={3}
                 max={50}
                 value={cols}
                 onChange={(e) => setCols(Number(e.target.value))}
               />
+              <span className={styles.inputHint}>3-50</span>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>Mines</label>
               <input
-                className={styles.input}
+                className={`${styles.input} ${mines < 1 || mines >= totalCells || !Number.isFinite(mines) ? styles.inputInvalid : ''}`}
                 type="number"
                 min={1}
                 max={totalCells - 1}
                 value={mines}
                 onChange={(e) => setMines(Number(e.target.value))}
               />
+              <span className={styles.inputHint}>1-{totalCells > 0 ? totalCells - 1 : '?'}</span>
             </div>
             <div className={styles.inputGroup}>
               <label className={styles.inputLabel}>HP</label>
               <input
-                className={styles.input}
+                className={`${styles.input} ${hp < 1 || hp > 20 || !Number.isFinite(hp) ? styles.inputInvalid : ''}`}
                 type="number"
                 min={1}
                 max={20}
                 value={hp}
                 onChange={(e) => setHp(Number(e.target.value))}
               />
+              <span className={styles.inputHint}>1-20</span>
             </div>
 
-            {showWarning && (
+            {!isValid && (
+              <div className={styles.error}>
+                Please fix the highlighted values before starting.
+              </div>
+            )}
+
+            {showWarning && isValid && (
               <div className={styles.warning}>
                 Warning: Mine density is {minePercentage.toFixed(1)}% (above 25% recommended max)
               </div>
@@ -118,7 +145,11 @@ export default function SettingsModal({ onStart, onClose }: SettingsModalProps) 
           <button className={styles.cancelButton} onClick={onClose}>
             Cancel
           </button>
-          <button className={styles.startButton} onClick={handleStart}>
+          <button
+            className={styles.startButton}
+            onClick={handleStart}
+            disabled={selectedPreset === null && !isValid}
+          >
             Start Game
           </button>
         </div>
