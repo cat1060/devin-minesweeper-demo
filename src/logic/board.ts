@@ -15,10 +15,11 @@ export function createEmptyBoard(rows: number, cols: number): Cell[][] {
 }
 
 /**
- * Assigns a mine power level based on the distribution:
+ * Generates a random mine power level based on the distribution:
  * 60% power-1, 30% power-2, 10% power-3.
  */
-export function assignMinePower(rand: number): number {
+export function randomMinePower(rng: () => number = Math.random): number {
+  const rand = rng()
   if (rand < 0.6) return 1
   if (rand < 0.9) return 2
   return 3
@@ -58,7 +59,7 @@ export function placeMines(
   // Place mines in the first mineCount positions
   for (let i = 0; i < mineCount; i++) {
     const [r, c] = positions[i]
-    board[r][c].minePower = assignMinePower(rng())
+    board[r][c].minePower = randomMinePower(rng)
   }
 
   return board
