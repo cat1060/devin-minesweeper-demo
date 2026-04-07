@@ -117,13 +117,10 @@ export function findRelocationTarget(
 }
 
 /**
- * Toggles the flag on a cell and handles boat relocation if needed.
+ * Toggles the flag on a cell.
  * - Cycles flag: NONE → FLAG → QUESTION → NONE
- * - Placing a new flag (NONE → FLAG) requires at least one revealed adjacent
- *   cell (canFlag). Cycling an existing flag (FLAG → QUESTION, QUESTION → NONE)
- *   always succeeds so the player is never stuck with an un-removable marker.
- * - If the boat is not adjacent to the flagged cell, relocates the boat
- *   to a revealed neighbor of the flagged cell (prefers cardinal)
+ * - Any unrevealed cell can be flagged/unflagged
+ * - Boat stays in place (no relocation)
  *
  * Returns the updated game state, or null if the action is invalid.
  */
@@ -131,35 +128,19 @@ export function flagCell(
   gameState: GameState,
   row: number,
   col: number,
-  rng: () => number = Math.random,
 ): GameState | null {
   if (gameState.gameStatus !== GameStatus.PLAYING) return null
   if (!isInBounds(gameState.board, row, col)) return null
 
-  const currentFlag = gameState.board[row][col].flagType
-  // Adjacency check only applies when placing a new flag (NONE → FLAG).
-  // Cycling an existing flag always succeeds so the player can always unflag.
-  if (currentFlag === FlagType.NONE && !canFlag(gameState.board, row, col)) return null
-  // Revealed cells can never be flagged regardless of transition
+  // Revealed cells can never be flagged
   if (gameState.board[row][col].isRevealed) return null
 
   const newBoard = cloneBoard(gameState.board)
   const cell = newBoard[row][col]
   cell.flagType = nextFlagType(cell.flagType)
 
-  let newBoatPosition = gameState.boatPosition
-
-  // Relocate boat if it's not adjacent to the flagged cell
-  if (!isAdjacent(gameState.boatPosition.row, gameState.boatPosition.col, row, col)) {
-    const target = findRelocationTarget(newBoard, row, col, rng)
-    if (target) {
-      newBoatPosition = target
-    }
-  }
-
   return {
     ...gameState,
     board: newBoard,
-    boatPosition: newBoatPosition,
   }
 }

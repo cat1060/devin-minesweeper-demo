@@ -200,7 +200,9 @@ describe('handleMineStep', () => {
       board,
       boatPosition: { row: 2, col: 2 },
       hp: 5,
+      initialHp: 5,
       mineCount: 0,
+      initialMineCount: 0,
       gameStatus: GameStatus.PLAYING,
     }
   }

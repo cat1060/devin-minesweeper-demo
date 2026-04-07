@@ -31,7 +31,9 @@ export interface GameState {
   board: Cell[][]
   boatPosition: Position
   hp: number
+  initialHp: number
   mineCount: number
+  initialMineCount: number
   gameStatus: GameStatus
 }
 

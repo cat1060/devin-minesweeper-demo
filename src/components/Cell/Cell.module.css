@@ -1,0 +1,76 @@
+.cell {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #999;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.boatTop {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.boatBottom {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hidden {
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+}
+
+.hidden:hover {
+  background: #d0d0d0;
+}
+
+.revealed {
+  background: #e0e0e0;
+  border: 1px solid #bbb;
+}
+
+.exploded {
+  background: #ff4444;
+  border: 1px solid #cc0000;
+}
+
+.boat {
+  background: #87ceeb;
+  border: 1px solid #5f9ea0;
+}
+
+.mineRevealed {
+  background: #c0c0c0;
+  border: 1px solid #999;
+}
+
+.flagged {
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #808080;
+  border-right: 2px solid #808080;
+}
+
+/* Adjacent mine count colors (classic Minesweeper palette) */
+.count1 { color: #0000ff; }
+.count2 { color: #008000; }
+.count3 { color: #ff0000; }
+.count4 { color: #000080; }
+.count5 { color: #800000; }
+.count6 { color: #008080; }
+.count7 { color: #000000; }
+.count8 { color: #808080; }

@@ -167,7 +167,9 @@ describe('flagCell', () => {
       board,
       boatPosition: { row: 2, col: 2 },
       hp: 5,
+      initialHp: 5,
       mineCount: 3,
+      initialMineCount: 3,
       gameStatus: GameStatus.PLAYING,
     }
   }
@@ -208,16 +210,16 @@ describe('flagCell', () => {
     expect(result).toBeNull()
   })
 
-  it('returns null for unflagged cells with no revealed neighbors', () => {
+  it('allows flagging cells with no revealed neighbors', () => {
     const state = createTestState()
     const result = flagCell(state, 4, 4)
 
-    expect(result).toBeNull()
+    expect(result).not.toBeNull()
+    expect(result!.board[4][4].flagType).toBe(FlagType.FLAG)
   })
 
-  it('allows unflagging even when no revealed neighbors exist', () => {
+  it('allows unflagging cells with no revealed neighbors', () => {
     const state = createTestState()
-    // Place a FLAG on an isolated cell (no revealed neighbors)
     state.board[4][4].flagType = FlagType.FLAG
 
     const result = flagCell(state, 4, 4)
@@ -249,43 +251,23 @@ describe('flagCell', () => {
     expect(flagCell(state, 0, 5)).toBeNull()
   })
 
-  it('does not relocate boat when boat is adjacent to flagged cell', () => {
+  it('does not move boat when flagging any cell', () => {
     const state = createTestState()
-    // Boat at (2,2), flagging (1,1) which is diagonally adjacent
+    // Boat at (2,2), flagging (1,1) which is adjacent
     const result = flagCell(state, 1, 1)
 
     expect(result).not.toBeNull()
     expect(result!.boatPosition).toEqual({ row: 2, col: 2 })
   })
 
-  it('relocates boat when boat is not adjacent to flagged cell', () => {
+  it('does not move boat when flagging a remote cell', () => {
     const state = createTestState()
-    // Reveal cells near (0,4) to make it flaggable
-    state.board[0][3].isRevealed = true
-    state.board[1][4].isRevealed = true
-
     // Boat at (2,2), flagging (0,4) — not adjacent
-    const result = flagCell(state, 0, 4, () => 0)
+    const result = flagCell(state, 0, 4)
 
     expect(result).not.toBeNull()
-    // Boat should relocate to a revealed neighbor of (0,4)
-    expect(result!.boatPosition).not.toEqual({ row: 2, col: 2 })
-    // Should be adjacent to the flagged cell
-    const bp = result!.boatPosition
-    expect(Math.abs(bp.row - 0) <= 1 && Math.abs(bp.col - 4) <= 1).toBe(true)
-  })
-
-  it('prefers cardinal neighbors for relocation', () => {
-    const state = createTestState()
-    // Set up a remote flaggable cell with both cardinal and diagonal revealed neighbors
-    state.board[0][3].isRevealed = true // cardinal neighbor of (0,4)
-    state.board[1][3].isRevealed = true // diagonal neighbor of (0,4)
-
-    const result = flagCell(state, 0, 4, () => 0)
-
-    expect(result).not.toBeNull()
-    // Should pick cardinal neighbor (0,3)
-    expect(result!.boatPosition).toEqual({ row: 0, col: 3 })
+    // Boat should stay at (2,2)
+    expect(result!.boatPosition).toEqual({ row: 2, col: 2 })
   })
 
   it('does not mutate the original game state', () => {

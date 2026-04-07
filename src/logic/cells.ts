@@ -1,5 +1,5 @@
 import type { Cell, GameState } from '../types/game'
-import { FlagType } from '../types/game'
+import { FlagType, GameStatus } from '../types/game'
 
 /**
  * All 8 directions (cardinal + diagonal) for neighbor counting and flood-fill.
@@ -50,6 +50,28 @@ export function hasBoat(gameState: GameState, row: number, col: number): boolean
  * Flagged cells are never revealed by flood-fill.
  * Returns the set of cells that were newly revealed.
  */
+/**
+ * Checks if the player has won: every unrevealed cell is a mine.
+ * If so, returns a new GameState with gameStatus set to WON.
+ * Otherwise returns the state unchanged.
+ */
+export function checkWinCondition(gameState: GameState): GameState {
+  if (gameState.gameStatus !== GameStatus.PLAYING) return gameState
+
+  for (const row of gameState.board) {
+    for (const cell of row) {
+      if (!cell.isRevealed && !cell.isExploded && cell.minePower === 0) {
+        return gameState
+      }
+    }
+  }
+
+  return {
+    ...gameState,
+    gameStatus: GameStatus.WON,
+  }
+}
+
 export function revealCell(
   board: Cell[][],
   row: number,

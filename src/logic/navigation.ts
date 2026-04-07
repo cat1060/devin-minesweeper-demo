@@ -15,6 +15,10 @@ const DIRECTION_MAP: Record<string, [number, number]> = {
   a: [0, -1],
   s: [1, 0],
   d: [0, 1],
+  W: [-1, 0],
+  A: [0, -1],
+  S: [1, 0],
+  D: [0, 1],
   ArrowUp: [-1, 0],
   ArrowDown: [1, 0],
   ArrowLeft: [0, -1],
@@ -72,7 +76,9 @@ export function initializeGame(
     board,
     boatPosition: startPos,
     hp,
+    initialHp: hp,
     mineCount: finalMineCount,
+    initialMineCount: mineCount,
     gameStatus: GameStatus.PLAYING,
   }
 }
@@ -115,6 +121,11 @@ export function moveBoat(
 
   // Deep-copy the board to avoid mutating the input state
   const newBoard = cloneBoard(gameState.board)
+
+  // Clear any flag/question mark on the destination cell before processing
+  if (newBoard[newRow][newCol].flagType !== FlagType.NONE) {
+    newBoard[newRow][newCol].flagType = FlagType.NONE
+  }
 
   // Auto-reveal the destination cell (flood-fill if 0 adjacent mines)
   revealCell(newBoard, newRow, newCol)
