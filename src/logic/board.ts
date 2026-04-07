@@ -66,6 +66,13 @@ export function placeMines(
 
 /**
  * Cardinal directions (up, down, left, right) for movement/accessibility.
+ *
+ * NOTE: Water connectivity intentionally uses cardinal-only (4-dir) adjacency
+ * because boat movement is cardinal. In contrast, `revealCell` in cells.ts uses
+ * 8-directional adjacency for flood-fill (matching mine-counting). This means a
+ * cell can be reachable via diagonal flood-fill reveal but still be considered
+ * "inaccessible" by `fillInaccessibleCells`. Keep both systems in sync if
+ * adjacency rules change.
  */
 const CARDINAL_DIRS: [number, number][] = [
   [-1, 0], [1, 0], [0, -1], [0, 1],

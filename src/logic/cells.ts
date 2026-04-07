@@ -2,7 +2,13 @@ import type { Cell, GameState } from '../types/game'
 import { FlagType } from '../types/game'
 
 /**
- * All 8 directions (cardinal + diagonal) for neighbor counting.
+ * All 8 directions (cardinal + diagonal) for neighbor counting and flood-fill.
+ *
+ * NOTE: This 8-directional adjacency is used for mine counting and revealCell
+ * flood-fill, while board.ts uses cardinal-only (4-dir) adjacency for water
+ * connectivity / boat movement. A cell may be diagonally reachable by flood-fill
+ * but considered "inaccessible" by fillInaccessibleCells. See CARDINAL_DIRS in
+ * board.ts for details.
  */
 const ALL_DIRS: [number, number][] = [
   [-1, -1], [-1, 0], [-1, 1],
