@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import type { GameState } from '../../types/game'
 import { GameStatus } from '../../types/game'
 import { useSwipe } from '../../hooks/useSwipe'
@@ -15,13 +16,13 @@ interface BoardProps {
 export default function Board({ gameState, onCellClick, onCellRightClick, onSwipe }: BoardProps) {
   const { board, boatPosition, gameStatus } = gameState
   const gameOver = gameStatus === GameStatus.WON || gameStatus === GameStatus.LOST
-  const swipeHandlers = useSwipe(onSwipe)
+  const boardRef = useRef<HTMLDivElement>(null)
+  useSwipe(boardRef, onSwipe)
 
   return (
     <div
       className={styles.board}
-      onTouchStart={swipeHandlers.onTouchStart}
-      onTouchEnd={swipeHandlers.onTouchEnd}
+      ref={boardRef}
     >
       {board.map((row, r) => (
         <div key={r} className={styles.row}>
