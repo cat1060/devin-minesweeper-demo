@@ -111,25 +111,29 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Minesweeper Boat</h1>
-      <Header
-        gameState={gameState}
-        timer={timer}
-        onReset={resetGame}
-        onOpenSettings={() => setShowSettings(true)}
-      />
-      <Board
-        gameState={gameState}
-        onCellClick={handleCellClick}
-        onCellRightClick={handleCellRightClick}
-        onSwipe={handleSwipe}
-      />
-      <p className="instructions desktop-instructions">
-        WASD / Arrow keys to move | Click to teleport | Right-click to flag
-      </p>
-      <p className="instructions mobile-instructions">
-        Swipe to move | Tap revealed cell to teleport | Tap unrevealed cell to flag
-      </p>
+      <div className="stickyHeader">
+        <h1>Minesweeper Boat</h1>
+        <Header
+          gameState={gameState}
+          timer={timer}
+          onReset={resetGame}
+          onOpenSettings={() => setShowSettings(true)}
+        />
+        <p className="instructions desktop-instructions">
+          WASD / Arrow keys to move | Click to teleport | Right-click to flag
+        </p>
+        <p className="instructions mobile-instructions">
+          Swipe to move | Tap revealed cell to teleport | Tap unrevealed cell to flag
+        </p>
+      </div>
+      <div className="boardContainer">
+        <Board
+          gameState={gameState}
+          onCellClick={handleCellClick}
+          onCellRightClick={handleCellRightClick}
+          onSwipe={handleSwipe}
+        />
+      </div>
       {showSettings && (
         <SettingsModal
           onStart={startNewGame}

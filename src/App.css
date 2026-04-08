@@ -2,19 +2,41 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
   min-height: 100vh;
   font-family: system-ui, -apple-system, sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg, #fff);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 8px;
 }
 
 .app h1 {
-  font-size: 2rem;
-  margin: 0 0 12px;
+  font-size: 1.6rem;
+  margin: 8px 0;
   color: var(--text-h);
 }
 
+.boardContainer {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .instructions {
-  margin-top: 12px;
+  margin-top: 8px;
   font-size: 13px;
   color: var(--text);
   opacity: 0.7;
@@ -32,15 +54,5 @@
   }
   .mobile-instructions {
     display: block;
-  }
-}
-
-@media (max-width: 480px) {
-  .app {
-    padding: 10px;
-  }
-  .app h1 {
-    font-size: 1.4rem;
-    margin: 0 0 8px;
   }
 }
