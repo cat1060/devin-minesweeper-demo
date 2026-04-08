@@ -30,9 +30,9 @@
 .boardContainer {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  max-width: 100%;
+  max-height: calc(100vh - 160px);
+  max-height: calc(100dvh - 160px);
 }
 
 .instructions {

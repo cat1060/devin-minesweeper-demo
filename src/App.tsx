@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSwipe } from './hooks/useSwipe'
 import { GameStatus, DIFFICULTY_PRESETS } from './types/game'
 import type { GameState } from './types/game'
 import { initializeGame, moveBoat, teleportBoat, handleMineStep, flagCell, checkWinCondition } from './logic'
@@ -109,6 +110,11 @@ function App() {
     })
   }, [showSettings])
 
+  // Attach swipe listener to boardContainer (the scroll container)
+  // so preventDefault intercepts touch events before scrolling starts
+  const boardContainerRef = useRef<HTMLDivElement>(null)
+  useSwipe(boardContainerRef, handleSwipe)
+
   return (
     <div className="app">
       <div className="stickyHeader">
@@ -126,12 +132,11 @@ function App() {
           Swipe to move | Tap revealed cell to teleport | Tap unrevealed cell to flag
         </p>
       </div>
-      <div className="boardContainer">
+      <div className="boardContainer" ref={boardContainerRef}>
         <Board
           gameState={gameState}
           onCellClick={handleCellClick}
           onCellRightClick={handleCellRightClick}
-          onSwipe={handleSwipe}
         />
       </div>
       {showSettings && (
