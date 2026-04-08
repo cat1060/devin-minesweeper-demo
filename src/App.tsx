@@ -2,12 +2,20 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { GameStatus, DIFFICULTY_PRESETS } from './types/game'
 import type { GameState } from './types/game'
 import { initializeGame, moveBoat, teleportBoat, handleMineStep, flagCell, checkWinCondition } from './logic'
+import type { SwipeDirection } from './hooks/useSwipe'
 import Board from './components/Board/Board'
 import Header from './components/Header/Header'
 import SettingsModal from './components/SettingsModal/SettingsModal'
 import './App.css'
 
 const DEFAULT_PRESET = DIFFICULTY_PRESETS.beginner
+
+const SWIPE_KEY_MAP: Record<SwipeDirection, string> = {
+  up: 'w',
+  down: 's',
+  left: 'a',
+  right: 'd',
+}
 
 function App() {
   const [gameState, setGameState] = useState<GameState>(() =>
@@ -90,6 +98,17 @@ function App() {
     })
   }, [])
 
+  // Swipe handler: map swipe direction to boat movement
+  const handleSwipe = useCallback((direction: SwipeDirection) => {
+    if (showSettings) return
+    const key = SWIPE_KEY_MAP[direction]
+    setGameState((prev) => {
+      const moved = moveBoat(prev, key)
+      if (!moved) return prev
+      return checkWinCondition(handleMineStep(moved))
+    })
+  }, [showSettings])
+
   return (
     <div className="app">
       <h1>Minesweeper Boat</h1>
@@ -103,9 +122,13 @@ function App() {
         gameState={gameState}
         onCellClick={handleCellClick}
         onCellRightClick={handleCellRightClick}
+        onSwipe={handleSwipe}
       />
-      <p className="instructions">
+      <p className="instructions desktop-instructions">
         WASD / Arrow keys to move | Click to teleport | Right-click to flag
+      </p>
+      <p className="instructions mobile-instructions">
+        Swipe to move | Tap revealed cell to teleport | Tap unrevealed cell to flag
       </p>
       {showSettings && (
         <SettingsModal

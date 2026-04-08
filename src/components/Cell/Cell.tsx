@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react'
 import type { Cell as CellType } from '../../types/game'
 import { FlagType } from '../../types/game'
 import { adjacentMines } from '../../logic'
@@ -116,6 +117,33 @@ export default function Cell({
   const boatCount = isBoat && !boatOnMine ? adjacentMines(board, row, col) : 0
   const showSplit = isBoat && (boatCount > 0 || boatOnMine)
 
+  // Track whether the touch moved (to distinguish tap from swipe)
+  const touchMoved = useRef(false)
+
+  const handleTouchStart = useCallback(() => {
+    touchMoved.current = false
+  }, [])
+
+  const handleTouchMove = useCallback(() => {
+    touchMoved.current = true
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    // If the finger moved, this is a swipe — let Board handle it
+    if (touchMoved.current) return
+
+    // Prevent the subsequent mouse click event from firing
+    e.preventDefault()
+
+    if (cell.isRevealed) {
+      // Tap on revealed cell → teleport
+      onClick(row, col)
+    } else {
+      // Tap on unrevealed cell → cycle flag
+      onRightClick(row, col)
+    }
+  }, [cell.isRevealed, onClick, onRightClick, row, col])
+
   return (
     <div
       className={`${className} ${countClass}`.trim()}
@@ -124,6 +152,9 @@ export default function Cell({
         e.preventDefault()
         onRightClick(row, col)
       }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       role="button"
       tabIndex={-1}
       aria-label={`Cell ${row},${col}`}

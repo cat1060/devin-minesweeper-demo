@@ -19,3 +19,28 @@
   color: var(--text);
   opacity: 0.7;
 }
+
+/* Show desktop instructions by default, hide mobile */
+.mobile-instructions {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  /* Touch-primary device: show mobile instructions, hide desktop */
+  .desktop-instructions {
+    display: none;
+  }
+  .mobile-instructions {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .app {
+    padding: 10px;
+  }
+  .app h1 {
+    font-size: 1.4rem;
+    margin: 0 0 8px;
+  }
+}
