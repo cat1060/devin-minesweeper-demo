@@ -49,21 +49,17 @@ export function useSwipe(
     }
 
     function handleTouchMove(e: TouchEvent) {
-      // If a second finger is added, cancel the swipe
+      // If a second finger is added, cancel the swipe and let browser
+      // handle two-finger pan / pinch-zoom natively.
       if (e.touches.length > 1) {
         startPos.current = null
         return
       }
 
-      if (!startPos.current) return
-
-      const touch = e.touches[0]
-      const dx = Math.abs(touch.clientX - startPos.current.x)
-      const dy = Math.abs(touch.clientY - startPos.current.y)
-
-      // Once the single-finger movement exceeds the threshold,
-      // prevent the browser from scrolling (this is our swipe gesture)
-      if (dx >= MIN_SWIPE_DISTANCE || dy >= MIN_SWIPE_DISTANCE) {
+      // Single-finger: always prevent scrolling so the board doesn't
+      // move under the finger. Two-finger scrolling still works because
+      // the branch above exits without calling preventDefault.
+      if (startPos.current) {
         e.preventDefault()
       }
     }
