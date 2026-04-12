@@ -145,10 +145,10 @@ function App() {
           onOpenSettings={() => setShowSettings(true)}
         />
         <p className="instructions desktop-instructions">
-          WASD / Arrow keys to move | Click to teleport | Right-click to flag
+          WASD / Arrow keys to move | Click to teleport | Right-click to flag/?/clear
         </p>
         <p className="instructions mobile-instructions">
-          Swipe to move | Tap revealed cell to teleport | Tap unrevealed cell to flag
+          Swipe to move | Two fingers to zoom or move map | Tap revealed cell to teleport | Tap unrevealed cell to flag/?/clear
         </p>
       </div>
       <div className="boardContainer" ref={boardContainerRef}>
