@@ -4,7 +4,7 @@ import { usePinchZoom } from './hooks/usePinchZoom'
 import { GameStatus, DIFFICULTY_PRESETS } from './types/game'
 import type { GameState } from './types/game'
 import { initializeGame, moveBoat, teleportBoat, handleMineStep, flagCell, checkWinCondition } from './logic'
-import type { SwipeDirection } from './hooks/useSwipe'
+import type { SwipeDirection, SwipeStartCell } from './hooks/useSwipe'
 import Board from './components/Board/Board'
 import Header from './components/Header/Header'
 import SettingsModal from './components/SettingsModal/SettingsModal'
@@ -100,13 +100,22 @@ function App() {
     })
   }, [])
 
-  // Swipe handler: map swipe direction to boat movement
-  const handleSwipe = useCallback((direction: SwipeDirection) => {
+  // Swipe handler: if the swipe started on a revealed cell that isn't the
+  // boat's current position, teleport the boat there first, then move.
+  const handleSwipe = useCallback((direction: SwipeDirection, cell?: SwipeStartCell) => {
     if (showSettings) return
     const key = SWIPE_KEY_MAP[direction]
     setGameState((prev) => {
-      const moved = moveBoat(prev, key)
-      if (!moved) return prev
+      let state = prev
+      // Teleport to the swipe-origin cell if it's a different revealed cell
+      if (cell) {
+        const teleported = teleportBoat(state, cell.row, cell.col)
+        if (teleported) {
+          state = checkWinCondition(teleported)
+        }
+      }
+      const moved = moveBoat(state, key)
+      if (!moved) return state
       return checkWinCondition(handleMineStep(moved))
     })
   }, [showSettings])

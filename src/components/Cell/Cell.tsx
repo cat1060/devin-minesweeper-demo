@@ -158,6 +158,8 @@ export default function Cell({
   return (
     <div
       className={`${className} ${countClass}`.trim()}
+      data-row={row}
+      data-col={col}
       onClick={() => onClick(row, col)}
       onContextMenu={(e) => {
         e.preventDefault()

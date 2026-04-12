@@ -8,12 +8,21 @@ const MIN_SWIPE_DISTANCE = 30
 
 export type SwipeDirection = 'up' | 'down' | 'left' | 'right'
 
+/** Cell coordinates where the swipe gesture started, if any. */
+export interface SwipeStartCell {
+  row: number
+  col: number
+}
+
 /**
  * Hook that detects swipe gestures on a touch surface.
  * Attaches native touch event listeners to the element referenced
  * by the provided ref.
  *
- * The callback receives one of 'up', 'down', 'left', 'right'.
+ * The callback receives a direction ('up'|'down'|'left'|'right') and
+ * optionally the cell where the swipe started (if the touch began on
+ * a Cell element with data-row / data-col attributes).
+ *
  * Only fires if the swipe distance exceeds MIN_SWIPE_DISTANCE
  * and the primary axis of movement is clear (not diagonal).
  *
@@ -24,9 +33,10 @@ export type SwipeDirection = 'up' | 'down' | 'left' | 'right'
  */
 export function useSwipe(
   boardRef: React.RefObject<HTMLDivElement | null>,
-  onSwipe: (direction: SwipeDirection) => void,
+  onSwipe: (direction: SwipeDirection, startCell?: SwipeStartCell) => void,
 ): void {
   const startPos = useRef<{ x: number; y: number } | null>(null)
+  const startCell = useRef<SwipeStartCell | undefined>(undefined)
   const onSwipeRef = useRef(onSwipe)
 
   useEffect(() => {
@@ -42,10 +52,26 @@ export function useSwipe(
       // Multi-touch (pinch-zoom, two-finger pan) is left to the browser.
       if (e.touches.length !== 1) {
         startPos.current = null
+        startCell.current = undefined
         return
       }
       const touch = e.touches[0]
       startPos.current = { x: touch.clientX, y: touch.clientY }
+
+      // Walk up from the touch target to find a Cell element with
+      // data-row / data-col attributes so we know which cell the
+      // swipe started on.
+      startCell.current = undefined
+      let target = e.target as HTMLElement | null
+      while (target && target !== el) {
+        const r = target.getAttribute('data-row')
+        const c = target.getAttribute('data-col')
+        if (r !== null && c !== null) {
+          startCell.current = { row: Number(r), col: Number(c) }
+          break
+        }
+        target = target.parentElement
+      }
     }
 
     function handleTouchMove(e: TouchEvent) {
@@ -79,10 +105,11 @@ export function useSwipe(
       if (absDx < MIN_SWIPE_DISTANCE && absDy < MIN_SWIPE_DISTANCE) return
 
       // Determine primary direction (must be clearly dominant)
+      const cell = startCell.current
       if (absDx > absDy) {
-        onSwipeRef.current(dx > 0 ? 'right' : 'left')
+        onSwipeRef.current(dx > 0 ? 'right' : 'left', cell)
       } else {
-        onSwipeRef.current(dy > 0 ? 'down' : 'up')
+        onSwipeRef.current(dy > 0 ? 'down' : 'up', cell)
       }
     }
 
