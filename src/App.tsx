@@ -26,6 +26,7 @@ function App() {
   const [timer, setTimer] = useState(0)
   const [showSettings, setShowSettings] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const resetZoomRef = useRef(() => {})
 
   // Start/stop timer based on game status
   useEffect(() => {
@@ -50,6 +51,7 @@ function App() {
       setGameState(initializeGame(rows, cols, mines, hp))
       setTimer(0)
       setShowSettings(false)
+      resetZoomRef.current()
     },
     [],
   )
@@ -126,7 +128,11 @@ function App() {
   // usePinchZoom handles two-finger pinch → board zoom + pan.
   const boardContainerRef = useRef<HTMLDivElement>(null)
   useSwipe(boardContainerRef, handleSwipe)
-  const { scale } = usePinchZoom(boardContainerRef)
+  const { scale, resetZoom } = usePinchZoom(boardContainerRef)
+
+  useEffect(() => {
+    resetZoomRef.current = resetZoom
+  }, [resetZoom])
 
   return (
     <div className="app">
@@ -139,10 +145,10 @@ function App() {
           onOpenSettings={() => setShowSettings(true)}
         />
         <p className="instructions desktop-instructions">
-          WASD / Arrow keys to move | Click to teleport | Right-click to flag
+          WASD / Arrow keys to move | Click to teleport | Right-click to flag/?/clear
         </p>
         <p className="instructions mobile-instructions">
-          Swipe to move | Tap revealed cell to teleport | Tap unrevealed cell to flag
+          Swipe to move | Two fingers to zoom or move map | Tap revealed cell to teleport | Tap unrevealed cell to flag/?/clear
         </p>
       </div>
       <div className="boardContainer" ref={boardContainerRef}>

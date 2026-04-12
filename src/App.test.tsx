@@ -8,11 +8,14 @@ describe('App', () => {
     expect(screen.getByText('Minesweeper Boat')).toBeInTheDocument()
   })
 
-  it('renders the instructions', () => {
+  it('renders desktop instructions containing WASD', () => {
     render(<App />)
-    expect(
-      screen.getByText('WASD / Arrow keys to move | Click to teleport | Right-click to flag'),
-    ).toBeInTheDocument()
+    expect(screen.getByText(/WASD/)).toBeInTheDocument()
+  })
+
+  it('renders mobile instructions containing Swipe', () => {
+    render(<App />)
+    expect(screen.getByText(/Swipe/)).toBeInTheDocument()
   })
 
   it('renders the header with HP and mine count', () => {
