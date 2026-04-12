@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 
-/**
- * Minimum distance-change ratio before we classify a gesture as a
- * pinch rather than a pan.  A ratio of 1.0 means "no change".
- * Values within 1 ± PINCH_THRESHOLD are treated as pure pan.
- */
-const PINCH_THRESHOLD = 0.06
+/** Cumulative midpoint movement (px) before locking as pan. */
+const PAN_LOCK_THRESHOLD = 8
+
+/** Cumulative distance change (px) before locking as pinch. */
+const PINCH_LOCK_THRESHOLD = 8
 
 /**
  * Hook that implements pinch-to-zoom on a scrollable container.
@@ -14,9 +13,9 @@ const PINCH_THRESHOLD = 0.06
  * - **Pan** (both fingers move together) → scrolls the container
  * - **Pinch** (fingers spread / contract) → adjusts zoom level
  *
- * The gesture type is detected on the first significant movement and
- * locked for the rest of the gesture so panning doesn't accidentally
- * zoom and vice-versa.
+ * Whichever threshold is crossed first (midpoint moved 8px = pan,
+ * finger distance changed 8px = pinch) locks the gesture type for
+ * the rest of the touch.  Pan never zooms; pinch zooms + pans.
  *
  * Returns the current scale and a resetZoom callback.
  * Apply the returned scale as `style={{ zoom: scale }}` on the
@@ -28,6 +27,8 @@ export function usePinchZoom(
   const [scale, setScale] = useState(1)
 
   const pinchState = useRef<{
+    initialDistance: number
+    initialMidpoint: { x: number; y: number }
     lastDistance: number
     lastMidpoint: { x: number; y: number }
     gesture: 'undecided' | 'pan' | 'pinch'
@@ -55,6 +56,8 @@ export function usePinchZoom(
         const dist = getDistance(e.touches[0], e.touches[1])
         const mid = getMidpoint(e.touches[0], e.touches[1])
         pinchState.current = {
+          initialDistance: dist,
+          initialMidpoint: mid,
           lastDistance: dist,
           lastMidpoint: mid,
           gesture: 'undecided',
@@ -71,18 +74,23 @@ export function usePinchZoom(
       const dist = getDistance(e.touches[0], e.touches[1])
       const mid = getMidpoint(e.touches[0], e.touches[1])
 
-      // Decide gesture type once and lock it for this gesture
+      // Decide gesture type based on which threshold is hit first
       if (pinchState.current.gesture === 'undecided') {
-        const ratio = dist / pinchState.current.lastDistance
-        if (Math.abs(ratio - 1) > PINCH_THRESHOLD) {
+        const cumulativeMidMove = Math.hypot(
+          mid.x - pinchState.current.initialMidpoint.x,
+          mid.y - pinchState.current.initialMidpoint.y,
+        )
+        const cumulativeDistChange = Math.abs(
+          dist - pinchState.current.initialDistance,
+        )
+
+        if (
+          cumulativeMidMove >= PAN_LOCK_THRESHOLD &&
+          cumulativeMidMove >= cumulativeDistChange
+        ) {
+          pinchState.current.gesture = 'pan'
+        } else if (cumulativeDistChange >= PINCH_LOCK_THRESHOLD) {
           pinchState.current.gesture = 'pinch'
-        } else {
-          // Check if midpoint moved enough to call it a pan
-          const mdx = Math.abs(mid.x - pinchState.current.lastMidpoint.x)
-          const mdy = Math.abs(mid.y - pinchState.current.lastMidpoint.y)
-          if (mdx > 8 || mdy > 8) {
-            pinchState.current.gesture = 'pan'
-          }
         }
       }
 
