@@ -163,6 +163,17 @@ export function createBoard(
 ): { board: Cell[][]; finalMineCount: number } {
   const board = createEmptyBoard(rows, cols)
   placeMines(board, mineCount, rng)
-  const addedMines = fillInaccessibleCells(board)
-  return { board, finalMineCount: mineCount + addedMines }
+
+  // Run fillInaccessibleCells iteratively until no new mines are added.
+  // A single pass should suffice mathematically, but iterating defends
+  // against any edge case where converting one component to mines might
+  // leave neighbouring cells newly isolated.
+  let totalAdded = 0
+  let added: number
+  do {
+    added = fillInaccessibleCells(board)
+    totalAdded += added
+  } while (added > 0)
+
+  return { board, finalMineCount: mineCount + totalAdded }
 }
