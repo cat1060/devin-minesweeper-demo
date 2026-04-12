@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSwipe } from './hooks/useSwipe'
+import { usePinchZoom } from './hooks/usePinchZoom'
 import { GameStatus, DIFFICULTY_PRESETS } from './types/game'
 import type { GameState } from './types/game'
 import { initializeGame, moveBoat, teleportBoat, handleMineStep, flagCell, checkWinCondition } from './logic'
@@ -110,10 +111,13 @@ function App() {
     })
   }, [showSettings])
 
-  // Attach swipe listener to boardContainer (the scroll container)
-  // so preventDefault intercepts touch events before scrolling starts
+  // Attach gesture listeners to boardContainer (the scroll container)
+  // so preventDefault intercepts touch events before scrolling starts.
+  // useSwipe handles single-finger swipe → boat movement.
+  // usePinchZoom handles two-finger pinch → board zoom + pan.
   const boardContainerRef = useRef<HTMLDivElement>(null)
   useSwipe(boardContainerRef, handleSwipe)
+  const { scale } = usePinchZoom(boardContainerRef)
 
   return (
     <div className="app">
@@ -133,11 +137,13 @@ function App() {
         </p>
       </div>
       <div className="boardContainer" ref={boardContainerRef}>
-        <Board
-          gameState={gameState}
-          onCellClick={handleCellClick}
-          onCellRightClick={handleCellRightClick}
-        />
+        <div style={{ zoom: scale }}>
+          <Board
+            gameState={gameState}
+            onCellClick={handleCellClick}
+            onCellRightClick={handleCellRightClick}
+          />
+        </div>
       </div>
       {showSettings && (
         <SettingsModal

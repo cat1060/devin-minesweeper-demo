@@ -30,6 +30,7 @@
 .boardContainer {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: none;
   flex: 1;
   max-width: 100%;
   min-height: 0;
