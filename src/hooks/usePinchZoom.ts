@@ -95,16 +95,16 @@ export function usePinchZoom(
       }
 
       if (pinchState.current.gesture === 'pinch') {
-        // Zoom: clamp between 0.2x and 3x
+        // Zoom only — no panning so the view doesn't drift while zooming
         const ratio = dist / pinchState.current.lastDistance
         setScale((prev) => Math.max(0.2, Math.min(3, prev * ratio)))
+      } else {
+        // Pan (scroll) only when gesture is pan or still undecided
+        const dx = mid.x - pinchState.current.lastMidpoint.x
+        const dy = mid.y - pinchState.current.lastMidpoint.y
+        el!.scrollLeft -= dx
+        el!.scrollTop -= dy
       }
-
-      // Always pan (scroll) regardless of gesture type
-      const dx = mid.x - pinchState.current.lastMidpoint.x
-      const dy = mid.y - pinchState.current.lastMidpoint.y
-      el!.scrollLeft -= dx
-      el!.scrollTop -= dy
 
       pinchState.current.lastDistance = dist
       pinchState.current.lastMidpoint = mid
