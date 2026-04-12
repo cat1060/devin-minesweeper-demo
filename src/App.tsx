@@ -26,6 +26,7 @@ function App() {
   const [timer, setTimer] = useState(0)
   const [showSettings, setShowSettings] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const resetZoomRef = useRef(() => {})
 
   // Start/stop timer based on game status
   useEffect(() => {
@@ -50,6 +51,7 @@ function App() {
       setGameState(initializeGame(rows, cols, mines, hp))
       setTimer(0)
       setShowSettings(false)
+      resetZoomRef.current()
     },
     [],
   )
@@ -126,7 +128,11 @@ function App() {
   // usePinchZoom handles two-finger pinch → board zoom + pan.
   const boardContainerRef = useRef<HTMLDivElement>(null)
   useSwipe(boardContainerRef, handleSwipe)
-  const { scale } = usePinchZoom(boardContainerRef)
+  const { scale, resetZoom } = usePinchZoom(boardContainerRef)
+
+  useEffect(() => {
+    resetZoomRef.current = resetZoom
+  }, [resetZoom])
 
   return (
     <div className="app">
