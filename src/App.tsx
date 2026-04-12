@@ -1,13 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSwipe } from './hooks/useSwipe'
+import { usePinchZoom } from './hooks/usePinchZoom'
 import { GameStatus, DIFFICULTY_PRESETS } from './types/game'
 import type { GameState } from './types/game'
 import { initializeGame, moveBoat, teleportBoat, handleMineStep, flagCell, checkWinCondition } from './logic'
+import type { SwipeDirection, SwipeStartCell } from './hooks/useSwipe'
 import Board from './components/Board/Board'
 import Header from './components/Header/Header'
 import SettingsModal from './components/SettingsModal/SettingsModal'
 import './App.css'
 
 const DEFAULT_PRESET = DIFFICULTY_PRESETS.beginner
+
+const SWIPE_KEY_MAP: Record<SwipeDirection, string> = {
+  up: 'w',
+  down: 's',
+  left: 'a',
+  right: 'd',
+}
 
 function App() {
   const [gameState, setGameState] = useState<GameState>(() =>
@@ -90,23 +100,60 @@ function App() {
     })
   }, [])
 
+  // Swipe handler: if the swipe started on a revealed cell that isn't the
+  // boat's current position, teleport the boat there first, then move.
+  const handleSwipe = useCallback((direction: SwipeDirection, cell?: SwipeStartCell) => {
+    if (showSettings) return
+    const key = SWIPE_KEY_MAP[direction]
+    setGameState((prev) => {
+      let state = prev
+      // Teleport to the swipe-origin cell if it's a different revealed cell
+      if (cell) {
+        const teleported = teleportBoat(state, cell.row, cell.col)
+        if (teleported) {
+          state = checkWinCondition(teleported)
+        }
+      }
+      const moved = moveBoat(state, key)
+      if (!moved) return state
+      return checkWinCondition(handleMineStep(moved))
+    })
+  }, [showSettings])
+
+  // Attach gesture listeners to boardContainer (the scroll container)
+  // so preventDefault intercepts touch events before scrolling starts.
+  // useSwipe handles single-finger swipe → boat movement.
+  // usePinchZoom handles two-finger pinch → board zoom + pan.
+  const boardContainerRef = useRef<HTMLDivElement>(null)
+  useSwipe(boardContainerRef, handleSwipe)
+  const { scale } = usePinchZoom(boardContainerRef)
+
   return (
     <div className="app">
-      <h1>Minesweeper Boat</h1>
-      <Header
-        gameState={gameState}
-        timer={timer}
-        onReset={resetGame}
-        onOpenSettings={() => setShowSettings(true)}
-      />
-      <Board
-        gameState={gameState}
-        onCellClick={handleCellClick}
-        onCellRightClick={handleCellRightClick}
-      />
-      <p className="instructions">
-        WASD / Arrow keys to move | Click to teleport | Right-click to flag
-      </p>
+      <div className="stickyHeader">
+        <h1>Minesweeper Boat</h1>
+        <Header
+          gameState={gameState}
+          timer={timer}
+          onReset={resetGame}
+          onOpenSettings={() => setShowSettings(true)}
+        />
+        <p className="instructions desktop-instructions">
+          WASD / Arrow keys to move | Click to teleport | Right-click to flag
+        </p>
+        <p className="instructions mobile-instructions">
+          Swipe to move | Tap revealed cell to teleport | Tap unrevealed cell to flag
+        </p>
+      </div>
+      <div className="boardContainer" ref={boardContainerRef}>
+        <div style={{ zoom: scale }}>
+          <Board
+            gameState={gameState}
+            onCellClick={handleCellClick}
+            onCellRightClick={handleCellRightClick}
+          />
+        </div>
+      </div>
       {showSettings && (
         <SettingsModal
           onStart={startNewGame}

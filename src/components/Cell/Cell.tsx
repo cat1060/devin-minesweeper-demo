@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react'
 import type { Cell as CellType } from '../../types/game'
 import { FlagType } from '../../types/game'
 import { adjacentMines } from '../../logic'
@@ -116,14 +117,57 @@ export default function Cell({
   const boatCount = isBoat && !boatOnMine ? adjacentMines(board, row, col) : 0
   const showSplit = isBoat && (boatCount > 0 || boatOnMine)
 
+  // Track whether the touch moved far enough to be a swipe (not a tap).
+  // A small tolerance (10px) avoids false positives from finger tremor.
+  const TAP_MOVE_TOLERANCE = 10
+  const touchMoved = useRef(false)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchMoved.current = false
+    const t = e.touches[0]
+    touchStart.current = { x: t.clientX, y: t.clientY }
+  }, [])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current) return
+    const t = e.touches[0]
+    const dx = Math.abs(t.clientX - touchStart.current.x)
+    const dy = Math.abs(t.clientY - touchStart.current.y)
+    if (dx > TAP_MOVE_TOLERANCE || dy > TAP_MOVE_TOLERANCE) {
+      touchMoved.current = true
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    // If the finger moved, this is a swipe — let Board handle it
+    if (touchMoved.current) return
+
+    // Prevent the subsequent mouse click event from firing
+    e.preventDefault()
+
+    if (cell.isRevealed) {
+      // Tap on revealed cell → teleport
+      onClick(row, col)
+    } else {
+      // Tap on unrevealed cell → cycle flag
+      onRightClick(row, col)
+    }
+  }, [cell.isRevealed, onClick, onRightClick, row, col])
+
   return (
     <div
       className={`${className} ${countClass}`.trim()}
+      data-row={row}
+      data-col={col}
       onClick={() => onClick(row, col)}
       onContextMenu={(e) => {
         e.preventDefault()
         onRightClick(row, col)
       }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       role="button"
       tabIndex={-1}
       aria-label={`Cell ${row},${col}`}
