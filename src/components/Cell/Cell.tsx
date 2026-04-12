@@ -117,15 +117,26 @@ export default function Cell({
   const boatCount = isBoat && !boatOnMine ? adjacentMines(board, row, col) : 0
   const showSplit = isBoat && (boatCount > 0 || boatOnMine)
 
-  // Track whether the touch moved (to distinguish tap from swipe)
+  // Track whether the touch moved far enough to be a swipe (not a tap).
+  // A small tolerance (10px) avoids false positives from finger tremor.
+  const TAP_MOVE_TOLERANCE = 10
   const touchMoved = useRef(false)
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
 
-  const handleTouchStart = useCallback(() => {
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchMoved.current = false
+    const t = e.touches[0]
+    touchStart.current = { x: t.clientX, y: t.clientY }
   }, [])
 
-  const handleTouchMove = useCallback(() => {
-    touchMoved.current = true
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current) return
+    const t = e.touches[0]
+    const dx = Math.abs(t.clientX - touchStart.current.x)
+    const dy = Math.abs(t.clientY - touchStart.current.y)
+    if (dx > TAP_MOVE_TOLERANCE || dy > TAP_MOVE_TOLERANCE) {
+      touchMoved.current = true
+    }
   }, [])
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
