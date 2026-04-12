@@ -248,4 +248,43 @@ describe('createBoard', () => {
     const components = findWaterComponents(board)
     expect(components.length).toBeLessThanOrEqual(1)
   })
+
+  it('never leaves unreachable water cells across many random seeds (beginner)', () => {
+    for (let s = 1; s <= 200; s++) {
+      let seed = s
+      const rng = () => {
+        seed = (seed * 16807 + 0) % 2147483647
+        return seed / 2147483647
+      }
+      const { board } = createBoard(9, 9, 10, rng)
+      const components = findWaterComponents(board)
+      expect(components.length).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('never leaves unreachable water cells across many random seeds (intermediate)', () => {
+    for (let s = 1; s <= 200; s++) {
+      let seed = s
+      const rng = () => {
+        seed = (seed * 16807 + 0) % 2147483647
+        return seed / 2147483647
+      }
+      const { board } = createBoard(16, 16, 40, rng)
+      const components = findWaterComponents(board)
+      expect(components.length).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('never leaves unreachable water cells across many random seeds (expert)', () => {
+    for (let s = 1; s <= 200; s++) {
+      let seed = s
+      const rng = () => {
+        seed = (seed * 16807 + 0) % 2147483647
+        return seed / 2147483647
+      }
+      const { board } = createBoard(16, 30, 99, rng)
+      const components = findWaterComponents(board)
+      expect(components.length).toBeLessThanOrEqual(1)
+    }
+  })
 })

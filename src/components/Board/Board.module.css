@@ -1,7 +1,10 @@
 .board {
   display: inline-flex;
   flex-direction: column;
-  border: 3px solid #808080;
+  border: 4px solid rgb(68, 137, 255);
+  box-shadow:
+    0 0 0 2px rgba(68, 137, 255, 0.4),
+    0 0 8px rgba(68, 137, 255, 0.25);
   background: #c0c0c0;
 }
 
